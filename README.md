@@ -1,5 +1,5 @@
 ﻿# Raindrop 🌧
-A simple game to try to get an RL model to beat
+A simple game to try to train an RL model to beat
 
 ## Get Started
 ```bash
