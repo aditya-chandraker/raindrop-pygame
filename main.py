@@ -162,9 +162,12 @@ class RaindropGame:
             self.hidden_size = hidden_size
             self.output_size = 1
 
+            self.fitness = 0
+
             # Initialize weights and biases randomly
             self.W1 = np.random.randn(self.input_size, self.hidden_size)
             self.b1 = np.zeros((1, self.hidden_size))
+
             self.W2 = np.random.randn(self.hidden_size, self.output_size)
             self.b2 = np.zeros((1, self.output_size))
 
@@ -260,11 +263,13 @@ class RaindropGame:
                 pygame.quit()
                 sys.exit()
 
-    def run(self):
-        bot_1 = self.Bot(self, "Bot 1")
-        bot_2 = self.Bot(self, "Bot 2")
+    def run(self, bots=[]):
+        # bot_1 = self.Bot(self, "Bot 1")
+        # bot_2 = self.Bot(self, "Bot 2")
         bot_3 = self.NeuralNetworkBot(self, "Neural Bot 1", 30)
-        user_1 = self.User(self, "User 1")
+        # user_1 = self.User(self, "User 1")
+
+        frame_count = 0
 
         while True:
             self.handle_quit_event()
@@ -272,13 +277,15 @@ class RaindropGame:
             self.draw_objects()            
 
             # User Controlled
-            user_1.handle_input()
+            # user_1.handle_input()
 
             # Computer Controlled (0 = only right, 1 = only left
             # between (0-1) = random chance of left or right based on percent_chance)
-            bot_1.random_move(0.0)
-            bot_2.random_move(0.5)
-            bot_3.determine_move()
+            # bot_1.random_move(0.0)
+            # bot_2.random_move(0.5)
+            # bot_3.determine_move()
+            for bot in bots:
+                bot.determine_move()
 
             # Update the display
             pygame.display.flip()
@@ -286,6 +293,28 @@ class RaindropGame:
             # Cap the frame rate
             self.clock.tick(60)
 
+            print(frame_count)
+
+            frame_count += 1
+            if frame_count >= 1000:
+                pygame.quit()
+                sys.exit()
+        
+
 if __name__ == "__main__":
     game = RaindropGame()
-    game.run()
+
+    bot_0 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 0", 30)
+    bot_1 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 1", 30)
+    bot_2 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 2", 30)
+    bot_3 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 3", 30)
+    bot_4 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 4", 30)
+    bot_5 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 5", 30)
+    bot_6 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 6", 30)
+    bot_7 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 7", 30)
+    bot_8 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 8", 30)
+    bot_9 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 9", 30)
+
+    bots = [bot_0, bot_1, bot_2, bot_3, bot_4, bot_5, bot_6, bot_7, bot_8, bot_9]
+
+    game.run(bots)
