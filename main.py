@@ -5,7 +5,8 @@ from collections import deque
 import numpy as np
 
 class RaindropGame:
-    BLOCK_WIDTH, BLOCK_HEIGHT = 50, 50  # Class attributes
+    BLOCK_WIDTH, BLOCK_HEIGHT = 50, 50
+
     WHITE = (255, 255, 255)
     WHITE_ALPHA_100 = (255, 255, 255, 100)
     BLACK = (0, 0, 0)
@@ -149,16 +150,17 @@ class RaindropGame:
                 distance_x = block_center_x - player_center_x
                 distance_y = block_center_y - player_center_y
 
-                distances.append({"x": distance_x, "y": distance_y})
+                distances.append(distance_x)
+                distances.append(distance_y)
 
             return distances
     
     class NeuralNetworkBot(Bot):
-        def __init__(self, game, name, input_size, hidden_size, output_size):
+        def __init__(self, game, name, hidden_size):
             super().__init__(game, name)
-            self.input_size = input_size
+            self.input_size = 21
             self.hidden_size = hidden_size
-            self.output_size = output_size
+            self.output_size = 1
 
             # Initialize weights and biases randomly
             self.W1 = np.random.randn(self.input_size, self.hidden_size)
@@ -180,40 +182,36 @@ class RaindropGame:
             output = np.dot(layer2, self.W2) + self.b2
 
             return output
-
-        def handle_computer_input(self):
-            self.check_win_and_collisions()
-
+       
+        def determine_move(self):            
+            if not self.alive:
+                return  # Do nothing if the bot is not alive
+            
             # Get the distances to the dropped blocks
-            distances = self.get_distance_to_blocks()
+            distances = super().get_distance_to_blocks()
+
+            # if there are less than 10 blocks, pad the list with zeros
+            if len(distances) < 20:
+                distances += [0] * (20 - len(distances))
 
             # Preprocess input data
-            input_data = np.array([distances + [self.block_x, self.block_y]])
+            input_data = np.array([distances + [self.block_x]])
+            # print("input " +  str(input_data))
+            # print("\n")
 
             # Forward pass through the neural network
             output = self.forward(input_data)
+            # print("output " + str(output[0][0]))
+            # print("\n")
 
             # Determine the bot's move based on the output
-            if output[0][0] > output[0][1] and output[0][0] > output[0][2]:
-                move_left = 1
-            elif output[0][1] > output[0][0] and output[0][1] > output[0][2]:
-                move_left = 2
+            if output[0][0] > .6:
+                super().handle_computer_input(1)
+            elif output[0][0] < .4:
+                super().handle_computer_input(2)
             else:
-                move_left = 0
+                super().handle_computer_input(0)
 
-            # Simulate computer player input
-            if move_left == 1 and self.block_x > 0:
-                self.block_speed -= self.ACCELERATION
-            elif move_left == 2 and self.block_x < self.game.width - RaindropGame.BLOCK_WIDTH:
-                self.block_speed += self.ACCELERATION
-            else:
-                self.block_speed *= 0.9
-
-            # Update the block position based on the speed
-            self.block_x += self.block_speed
-
-            # Draw the player block
-            pygame.draw.rect(self.game.screen, RaindropGame.WHITE_ALPHA_100, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
 
         def get_weights_and_biases(self):
             return np.concatenate((self.W1.flatten(), self.b1.flatten(), self.W2.flatten(), self.b2.flatten()))
@@ -265,6 +263,7 @@ class RaindropGame:
     def run(self):
         bot_1 = self.Bot(self, "Bot 1")
         bot_2 = self.Bot(self, "Bot 2")
+        bot_3 = self.NeuralNetworkBot(self, "Neural Bot 1", 30)
         user_1 = self.User(self, "User 1")
 
         while True:
@@ -279,6 +278,7 @@ class RaindropGame:
             # between (0-1) = random chance of left or right based on percent_chance)
             bot_1.random_move(0.0)
             bot_2.random_move(0.5)
+            bot_3.determine_move()
 
             # Update the display
             pygame.display.flip()
