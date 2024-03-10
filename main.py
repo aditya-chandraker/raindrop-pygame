@@ -2,10 +2,12 @@ import pygame
 import sys
 import random
 from collections import deque
+import numpy as np
 
 class RaindropGame:
     BLOCK_WIDTH, BLOCK_HEIGHT = 50, 50  # Class attributes
     WHITE = (255, 255, 255)
+    WHITE_ALPHA_100 = (255, 255, 255, 100)
     BLACK = (0, 0, 0)
     BLUE = (120, 120, 255)
     RED = (255, 0, 0)
@@ -29,11 +31,11 @@ class RaindropGame:
         # Main game loop
         self.clock = pygame.time.Clock()
 
-    def handle_quit_event(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+    def draw_rect_alpha(surface, color, rect):
+        shape_surf = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+        pygame.draw.rect(shape_surf, color, shape_surf.get_rect())
+        surface.blit(shape_surf, rect)
+
 
     class User:
         def __init__(self, game, name):
@@ -76,7 +78,10 @@ class RaindropGame:
             self.block_x += self.block_speed
 
             # Draw the player block
-            pygame.draw.rect(self.game.screen, RaindropGame.RED, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
+            # pygame.draw.rect(self.game.screen, RaindropGame.RED, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
+
+            RaindropGame.draw_rect_alpha(self.game.screen, RaindropGame.RED, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
+
 
     class Bot:
         def __init__(self, game, name):
@@ -93,6 +98,8 @@ class RaindropGame:
             # Check if the player reaches the right side and wins
             if self.block_x >= self.game.width - RaindropGame.BLOCK_WIDTH:
                 print(self.name + " reached the right side")
+                self.alive = False
+
 
             # Check for collisions with dropped blocks
             player_rect = pygame.Rect(self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT)
@@ -116,7 +123,9 @@ class RaindropGame:
             self.block_x += self.block_speed
             
             # Draw the player block
-            pygame.draw.rect(self.game.screen, RaindropGame.WHITE, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
+            # pygame.draw.rect(self.game.screen, RaindropGame.WHITE_ALPHA_100, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
+            RaindropGame.draw_rect_alpha(self.game.screen, RaindropGame.WHITE_ALPHA_100, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
+
 
         def random_move(self, percent_chance=0.5):
             if not self.alive:
@@ -143,6 +152,89 @@ class RaindropGame:
                 distances.append({"x": distance_x, "y": distance_y})
 
             return distances
+    
+    class NeuralNetworkBot(Bot):
+        def __init__(self, game, name, input_size, hidden_size, output_size):
+            super().__init__(game, name)
+            self.input_size = input_size
+            self.hidden_size = hidden_size
+            self.output_size = output_size
+
+            # Initialize weights and biases randomly
+            self.W1 = np.random.randn(self.input_size, self.hidden_size)
+            self.b1 = np.zeros((1, self.hidden_size))
+            self.W2 = np.random.randn(self.hidden_size, self.output_size)
+            self.b2 = np.zeros((1, self.output_size))
+
+        def sigmoid(self, x):
+            return 1 / (1 + np.exp(-x))
+
+        def forward(self, input_data):
+            # Input layer
+            layer1 = np.dot(input_data, self.W1) + self.b1
+
+            # Hidden layer
+            layer2 = self.sigmoid(layer1)
+
+            # Output layer
+            output = np.dot(layer2, self.W2) + self.b2
+
+            return output
+
+        def handle_computer_input(self):
+            self.check_win_and_collisions()
+
+            # Get the distances to the dropped blocks
+            distances = self.get_distance_to_blocks()
+
+            # Preprocess input data
+            input_data = np.array([distances + [self.block_x, self.block_y]])
+
+            # Forward pass through the neural network
+            output = self.forward(input_data)
+
+            # Determine the bot's move based on the output
+            if output[0][0] > output[0][1] and output[0][0] > output[0][2]:
+                move_left = 1
+            elif output[0][1] > output[0][0] and output[0][1] > output[0][2]:
+                move_left = 2
+            else:
+                move_left = 0
+
+            # Simulate computer player input
+            if move_left == 1 and self.block_x > 0:
+                self.block_speed -= self.ACCELERATION
+            elif move_left == 2 and self.block_x < self.game.width - RaindropGame.BLOCK_WIDTH:
+                self.block_speed += self.ACCELERATION
+            else:
+                self.block_speed *= 0.9
+
+            # Update the block position based on the speed
+            self.block_x += self.block_speed
+
+            # Draw the player block
+            pygame.draw.rect(self.game.screen, RaindropGame.WHITE_ALPHA_100, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
+
+        def get_weights_and_biases(self):
+            return np.concatenate((self.W1.flatten(), self.b1.flatten(), self.W2.flatten(), self.b2.flatten()))
+
+        def set_weights_and_biases(self, weights_and_biases):
+            weight_size = self.input_size * self.hidden_size
+            bias_size = self.hidden_size
+            W1_start = 0
+            W1_end = weight_size
+            b1_start = W1_end
+            b1_end = b1_start + bias_size
+            W2_start = b1_end
+            W2_end = W2_start + self.hidden_size * self.output_size
+            b2_start = W2_end
+            b2_end = b2_start + self.output_size
+
+            self.W1 = np.reshape(weights_and_biases[W1_start:W1_end], (self.input_size, self.hidden_size))
+            self.b1 = np.reshape(weights_and_biases[b1_start:b1_end], (1, self.hidden_size))
+            self.W2 = np.reshape(weights_and_biases[W2_start:W2_end], (self.hidden_size, self.output_size))
+            self.b2 = np.reshape(weights_and_biases[b2_start:b2_end], (1, self.output_size))
+
 
     def draw_objects(self):
         # Clear the screen
@@ -163,6 +255,12 @@ class RaindropGame:
             new_block_y = 0 - RaindropGame.BLOCK_HEIGHT
             self.dropped_blocks.append(pygame.Rect(new_block_x, new_block_y, RaindropGame.BLOCK_WIDTH / 2, RaindropGame.BLOCK_HEIGHT / 2))
             self.drop_timer = current_time
+
+    def handle_quit_event(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
     def run(self):
         bot_1 = self.Bot(self, "Bot 1")
