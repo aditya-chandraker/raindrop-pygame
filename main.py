@@ -22,7 +22,7 @@ class RaindropGame:
         pygame.display.set_caption("Raindrop")
 
         # Set up the dropped blocks using a deque with a maximum size of 30
-        self.MAX_DROPPED_BLOCKS = 10
+        self.MAX_DROPPED_BLOCKS = 15
         self.DROP_INTERVAL = 100
         self.dropped_blocks = deque(maxlen=self.MAX_DROPPED_BLOCKS)
 
@@ -165,7 +165,7 @@ class RaindropGame:
     class NeuralNetworkBot(Bot):
         def __init__(self, game, name, hidden_size):
             super().__init__(game, name)
-            self.input_size = 21
+            self.input_size = game.MAX_DROPPED_BLOCKS * 2 + 1
             self.hidden_size = hidden_size
             self.output_size = 1
 
@@ -212,8 +212,8 @@ class RaindropGame:
             distances = super().get_distance_to_blocks()
 
             # if there are less than 10 blocks, pad the list with zeros
-            if len(distances) < 20:
-                distances += [0] * (20 - len(distances))
+            if len(distances) < self.input_size - 1:
+                distances += [0] * (self.input_size - 1 - len(distances))
 
             # Preprocess input data
             input_data = np.array([distances + [self.block_x]])
