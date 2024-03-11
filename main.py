@@ -282,10 +282,10 @@ class RaindropGame:
                 sys.exit()
 
     def run(self, bots=[]):
-        # bot_1 = self.Bot(self, "Bot 1")
-        # bot_2 = self.Bot(self, "Bot 2")
-        # bot_3 = self.NeuralNetworkBot(self, "Neural Bot 1", 30)
-        # user_1 = self.User(self, "User 1")
+        # bot_1 = self.Bot(self, "B1")
+        # bot_2 = self.Bot(self, "B2")
+        # bot_3 = self.NeuralNetworkBot(self, "NB1", 30)
+        # user_1 = self.User(self, "U1")
 
         while True:
             self.handle_quit_event()
@@ -317,16 +317,16 @@ class RaindropGame:
 if __name__ == "__main__":
     game = RaindropGame()
 
-    bot_0 = RaindropGame.NeuralNetworkBot(game, "NB0", 30)
-    bot_1 = RaindropGame.NeuralNetworkBot(game, "NB1", 30)
-    bot_2 = RaindropGame.NeuralNetworkBot(game, "NB2", 30)
-    bot_3 = RaindropGame.NeuralNetworkBot(game, "NB3", 30)
-    bot_4 = RaindropGame.NeuralNetworkBot(game, "NB4", 30)
+    bot_0 = RaindropGame.NeuralNetworkBot(game, "NB0", 5)
+    bot_1 = RaindropGame.NeuralNetworkBot(game, "NB1", 10)
+    bot_2 = RaindropGame.NeuralNetworkBot(game, "NB2", 15)
+    bot_3 = RaindropGame.NeuralNetworkBot(game, "NB3", 20)
+    bot_4 = RaindropGame.NeuralNetworkBot(game, "NB4", 25)
     bot_5 = RaindropGame.NeuralNetworkBot(game, "NB5", 30)
-    bot_6 = RaindropGame.NeuralNetworkBot(game, "NB6", 30)
-    bot_7 = RaindropGame.NeuralNetworkBot(game, "NB7", 30)
-    bot_8 = RaindropGame.NeuralNetworkBot(game, "NB8", 30)
-    bot_9 = RaindropGame.NeuralNetworkBot(game, "NB9", 30)
+    bot_6 = RaindropGame.NeuralNetworkBot(game, "NB6", 35)
+    bot_7 = RaindropGame.NeuralNetworkBot(game, "NB7", 40)
+    bot_8 = RaindropGame.NeuralNetworkBot(game, "NB8", 45)
+    bot_9 = RaindropGame.NeuralNetworkBot(game, "NB9", 50)
 
     bots = [bot_0, bot_1, bot_2, bot_3, bot_4, bot_5, bot_6, bot_7, bot_8, bot_9]
 
