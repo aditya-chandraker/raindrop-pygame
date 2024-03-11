@@ -32,10 +32,15 @@ class RaindropGame:
         # Main game loop
         self.clock = pygame.time.Clock()
 
-    def draw_rect_alpha(surface, color, rect):
+    def draw_rect_alpha(surface, color, rect, name):
         shape_surf = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
         pygame.draw.rect(shape_surf, color, shape_surf.get_rect())
         surface.blit(shape_surf, rect)
+
+        font = pygame.font.SysFont('arial', 18)
+        text = font.render(name, 1, (0, 0, 0))
+        textpos = (rect[0] + 10, rect[1] + 10)
+        surface.blit(text, textpos)
 
 
     class User:
@@ -81,7 +86,7 @@ class RaindropGame:
             # Draw the player block
             # pygame.draw.rect(self.game.screen, RaindropGame.RED, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
 
-            RaindropGame.draw_rect_alpha(self.game.screen, RaindropGame.RED, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
+            RaindropGame.draw_rect_alpha(self.game.screen, RaindropGame.RED, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT), self.name)
 
 
     class Bot:
@@ -127,7 +132,7 @@ class RaindropGame:
             
             # Draw the player block
             # pygame.draw.rect(self.game.screen, RaindropGame.WHITE_ALPHA_100, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
-            RaindropGame.draw_rect_alpha(self.game.screen, RaindropGame.WHITE_ALPHA_100, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT))
+            RaindropGame.draw_rect_alpha(self.game.screen, RaindropGame.WHITE_ALPHA_100, (self.block_x, self.block_y, RaindropGame.BLOCK_WIDTH, RaindropGame.BLOCK_HEIGHT), self.name)
 
 
         def random_move(self, percent_chance=0.5):
@@ -279,7 +284,7 @@ class RaindropGame:
     def run(self, bots=[]):
         # bot_1 = self.Bot(self, "Bot 1")
         # bot_2 = self.Bot(self, "Bot 2")
-        bot_3 = self.NeuralNetworkBot(self, "Neural Bot 1", 30)
+        # bot_3 = self.NeuralNetworkBot(self, "Neural Bot 1", 30)
         # user_1 = self.User(self, "User 1")
 
         while True:
@@ -312,16 +317,16 @@ class RaindropGame:
 if __name__ == "__main__":
     game = RaindropGame()
 
-    bot_0 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 0", 30)
-    bot_1 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 1", 30)
-    bot_2 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 2", 30)
-    bot_3 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 3", 30)
-    bot_4 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 4", 30)
-    bot_5 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 5", 30)
-    bot_6 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 6", 30)
-    bot_7 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 7", 30)
-    bot_8 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 8", 30)
-    bot_9 = RaindropGame.NeuralNetworkBot(game, "Neural Bot 9", 30)
+    bot_0 = RaindropGame.NeuralNetworkBot(game, "NB0", 30)
+    bot_1 = RaindropGame.NeuralNetworkBot(game, "NB1", 30)
+    bot_2 = RaindropGame.NeuralNetworkBot(game, "NB2", 30)
+    bot_3 = RaindropGame.NeuralNetworkBot(game, "NB3", 30)
+    bot_4 = RaindropGame.NeuralNetworkBot(game, "NB4", 30)
+    bot_5 = RaindropGame.NeuralNetworkBot(game, "NB5", 30)
+    bot_6 = RaindropGame.NeuralNetworkBot(game, "NB6", 30)
+    bot_7 = RaindropGame.NeuralNetworkBot(game, "NB7", 30)
+    bot_8 = RaindropGame.NeuralNetworkBot(game, "NB8", 30)
+    bot_9 = RaindropGame.NeuralNetworkBot(game, "NB9", 30)
 
     bots = [bot_0, bot_1, bot_2, bot_3, bot_4, bot_5, bot_6, bot_7, bot_8, bot_9]
 
