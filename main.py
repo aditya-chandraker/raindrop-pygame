@@ -94,12 +94,14 @@ class RaindropGame:
             self.block_speed = 0
             self.ACCELERATION = 0.1
             self.alive = True
+            self.win = False
 
         def check_win_and_collisions(self):
             # Check if the player reaches the right side and wins
             if self.block_x >= self.game.width - RaindropGame.BLOCK_WIDTH:
                 print(self.name + " reached the right side")
                 self.alive = False
+                self.win = True
 
 
             # Check for collisions with dropped blocks
@@ -185,7 +187,18 @@ class RaindropGame:
             output = np.dot(layer2, self.W2) + self.b2
 
             return output
-       
+        
+        def check_win_and_collisions(self):
+            super().check_win_and_collisions()
+            if self.win:
+                self.fitness += pygame.time.get_ticks()
+                self.fitness += 5000
+            
+            if not self.alive:
+                self.fitness += pygame.time.get_ticks()
+                self.fitness += np.floor(self.block_x*10)
+
+
         def determine_move(self):            
             if not self.alive:
                 return  # Do nothing if the bot is not alive
@@ -269,8 +282,6 @@ class RaindropGame:
         bot_3 = self.NeuralNetworkBot(self, "Neural Bot 1", 30)
         # user_1 = self.User(self, "User 1")
 
-        frame_count = 0
-
         while True:
             self.handle_quit_event()
             self.drop_new_block()
@@ -293,13 +304,10 @@ class RaindropGame:
             # Cap the frame rate
             self.clock.tick(60)
 
-            print(frame_count)
+            # print(pygame.time.get_ticks())
 
-            frame_count += 1
-            if frame_count >= 1000:
-                pygame.quit()
-                sys.exit()
-        
+            if pygame.time.get_ticks() >= 10000:
+                return
 
 if __name__ == "__main__":
     game = RaindropGame()
@@ -318,3 +326,10 @@ if __name__ == "__main__":
     bots = [bot_0, bot_1, bot_2, bot_3, bot_4, bot_5, bot_6, bot_7, bot_8, bot_9]
 
     game.run(bots)
+
+    for bot in bots:
+        print(bot.name + " fitness: " + str(bot.fitness))
+
+    pygame.quit()
+    sys.exit()
+
